@@ -57,7 +57,7 @@ const RequestPickup = () => {
               ) : (
                 <>
                   <Upload className="h-8 w-8 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">Click to upload a photo</span>
+                  <span className="text-sm text-muted-foreground">Click to upload a photo of the waste spot</span>
                 </>
               )}
               <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
