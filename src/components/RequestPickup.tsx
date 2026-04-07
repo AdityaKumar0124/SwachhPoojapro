@@ -19,6 +19,19 @@ const RequestPickup = () => {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const entry = {
+      id: Date.now(),
+      name: formData.get("name") as string,
+      phone: formData.get("phone") as string,
+      address: formData.get("address") as string,
+      time: formData.get("time") as string,
+      photo: preview || null,
+      submittedAt: new Date().toISOString(),
+    };
+    const existing = JSON.parse(localStorage.getItem("puja_requests") || "[]");
+    existing.push(entry);
+    localStorage.setItem("puja_requests", JSON.stringify(existing));
     setSubmitted(true);
     toast.success("Report submitted! We'll clean it up soon. 🙏");
   };
