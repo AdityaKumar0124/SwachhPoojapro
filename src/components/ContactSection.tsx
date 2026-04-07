@@ -9,8 +9,8 @@ const ContactSection = () => (
 
       <div className="grid sm:grid-cols-2 gap-4">
         {[
-          { icon: Phone, label: "+91 98765 43210", href: "tel:+919876543210" },
-          { icon: Mail, label: "hello@pujawaste.in", href: "mailto:hello@pujawaste.in" },
+          { icon: Phone, label: "+91 98773 63729", href: "tel:+919877363729" },
+          { icon: Mail, label: "adityakumar@gmail.com", href: "mailto:adityakumar@gmail.com" },
           { icon: MapPin, label: "Delhi NCR, India", href: "#" },
         ].map((c, i) => (
           <a key={i} href={c.href} className="flex items-center gap-3 bg-card rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow">
@@ -19,7 +19,7 @@ const ContactSection = () => (
           </a>
         ))}
         <a
-          href="https://wa.me/919876543210?text=Hi%2C%20I%20want%20to%20report%20puja%20waste%20on%20the%20road"
+          href="https://wa.me/919877363729?text=Hi%2C%20I%20want%20to%20report%20puja%20waste%20on%20the%20road"
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center gap-3 bg-primary rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow"
