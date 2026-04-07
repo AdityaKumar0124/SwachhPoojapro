@@ -75,8 +75,8 @@ const RequestPickup = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="address">Address</Label>
-            <Input id="address" placeholder="Your full pickup address" required />
+            <Label htmlFor="address">Waste Location</Label>
+            <Input id="address" placeholder="Road/area where you spotted the waste" required />
           </div>
 
           <div className="space-y-2">
