@@ -40,8 +40,8 @@ const RequestPickup = () => {
     <section id="request" className="py-16 md:py-24">
       <div className="container max-w-xl space-y-8">
         <div className="text-center">
-          <h2 className="text-2xl md:text-4xl font-bold text-foreground">Request a Pickup</h2>
-          <p className="text-muted-foreground mt-2">Fill in the details and we'll be at your door!</p>
+          <h2 className="text-2xl md:text-4xl font-bold text-foreground">Report Puja Waste</h2>
+          <p className="text-muted-foreground mt-2">Spotted puja waste on the road? Share the details and we'll clean it up!</p>
         </div>
 
         <form onSubmit={handleSubmit} className="bg-card rounded-2xl shadow-sm border p-6 md:p-8 space-y-5">
