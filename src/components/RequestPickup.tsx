@@ -47,7 +47,7 @@ const RequestPickup = () => {
         <form onSubmit={handleSubmit} className="bg-card rounded-2xl shadow-sm border p-6 md:p-8 space-y-5">
           {/* Photo Upload */}
           <div className="space-y-2">
-            <Label>Photo of Puja Materials</Label>
+            <Label>Photo of Roadside Puja Waste</Label>
             <div
               onClick={() => fileRef.current?.click()}
               className="border-2 border-dashed rounded-xl p-6 flex flex-col items-center gap-2 cursor-pointer hover:border-primary transition-colors"
