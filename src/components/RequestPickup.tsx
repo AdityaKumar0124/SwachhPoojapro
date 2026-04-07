@@ -84,7 +84,7 @@ const RequestPickup = () => {
 
           <div className="space-y-2">
             <Label htmlFor="phone">Phone Number</Label>
-            <Input id="phone" type="tel" placeholder="+91 98765 43210" required />
+            <Input id="phone" name="phone" type="tel" placeholder="+91 98765 43210" required />
           </div>
 
           <div className="space-y-2">
