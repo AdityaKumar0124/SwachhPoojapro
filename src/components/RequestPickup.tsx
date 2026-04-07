@@ -29,7 +29,7 @@ const RequestPickup = () => {
         <div className="container max-w-lg text-center space-y-6 animate-fade-in-up">
           <CheckCircle2 className="mx-auto h-16 w-16 text-primary" />
           <h2 className="text-2xl md:text-3xl font-bold text-foreground">Thank You!</h2>
-          <p className="text-muted-foreground">Your pickup request has been received. Our team will reach out to confirm the pickup details.</p>
+          <p className="text-muted-foreground">Your report has been received. Our team will go to the spot and clean it up!</p>
           <Button onClick={() => setSubmitted(false)}>Submit Another Request</Button>
         </div>
       </section>
