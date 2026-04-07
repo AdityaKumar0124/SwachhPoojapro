@@ -94,7 +94,7 @@ const RequestPickup = () => {
 
           <div className="space-y-2">
             <Label htmlFor="time">Preferred Pickup Time</Label>
-            <Input id="time" placeholder="e.g. Morning 9-12" required />
+            <Input id="time" name="time" placeholder="e.g. Morning 9-12" required />
           </div>
 
           <Button type="submit" className="w-full" size="lg">
