@@ -1,23 +1,219 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
+import { LogOut, Leaf, Plus } from "lucide-react";
 import Navbar from "@/components/Navbar";
-import HeroSection from "@/components/HeroSection";
-import HowItWorks from "@/components/HowItWorks";
-import RequestPickup from "@/components/RequestPickup";
-import AboutSection from "@/components/AboutSection";
-import BenefitsSection from "@/components/BenefitsSection";
-import ContactSection from "@/components/ContactSection";
-import Footer from "@/components/Footer";
 
-const Index = () => (
-  <div className="min-h-screen">
-    <Navbar />
-    <HeroSection />
-    <HowItWorks />
-    <RequestPickup />
-    <AboutSection />
-    <BenefitsSection />
-    <ContactSection />
-    <Footer />
-  </div>
-);
+interface RequestEntry {
+  id: number;
+  userEmail: string;
+  address: string;
+  time: string;
+  notes: string;
+  photo: string | null;
+  status: string;
+  submittedAt: string;
+}
+
+const Index = () => {
+  const [requests, setRequests] = useState<RequestEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<{ email?: string; [key: string]: unknown } | null>(null);
+  const navigate = useNavigate();
+
+  // Form states
+  const [address, setAddress] = useState("");
+  const [time, setTime] = useState("");
+  const [notes, setNotes] = useState("");
+  const [photo, setPhoto] = useState<File | null>(null);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      let isMock = false;
+      let currentUserEmail = "";
+      const mockUserStr = localStorage.getItem("mock_login");
+      
+      if (mockUserStr) {
+        const parsed = JSON.parse(mockUserStr);
+        setUser(parsed);
+        isMock = true;
+        currentUserEmail = parsed.email;
+      } else {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          navigate("/login");
+          return;
+        }
+        setUser(session.user as { email?: string });
+        currentUserEmail = session.user.email || "";
+      }
+      
+      const data = JSON.parse(localStorage.getItem("puja_requests") || "[]");
+      const myRequests = data.filter((r: { userEmail: string }) => r.userEmail === currentUserEmail).reverse();
+      setRequests(myRequests);
+      setLoading(false);
+    };
+    checkAuth();
+  }, [navigate]);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    localStorage.removeItem("mock_login");
+    toast.success("Logged out");
+    navigate("/");
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setPhoto(e.target.files[0]);
+    }
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!address || !time) {
+      toast.error("Please fill in required fields.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const newReq: RequestEntry = {
+        id: Date.now(),
+        userEmail: user?.email,
+        address,
+        time,
+        notes,
+        photo: reader.result as string,
+        status: "Pending",
+        submittedAt: new Date().toISOString(),
+      };
+      const allData = JSON.parse(localStorage.getItem("puja_requests") || "[]");
+      allData.push(newReq);
+      localStorage.setItem("puja_requests", JSON.stringify(allData));
+      
+      setRequests([newReq, ...requests]);
+      setAddress("");
+      setTime("");
+      setNotes("");
+      setPhoto(null);
+      toast.success("Pickup Request Confirmed!");
+    };
+
+    if (photo) {
+      reader.readAsDataURL(photo);
+    } else {
+      reader.onloadend();
+    }
+  };
+
+  if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+
+  const total = requests.length;
+  const pending = requests.filter(r => r.status === "Pending").length;
+  const accepted = requests.filter(r => r.status === "In Progress" || r.status === "Accepted").length;
+  const completed = requests.filter(r => r.status === "Completed").length;
+
+  return (
+    <div className="min-h-screen bg-background">
+      <Navbar />
+      <div className="container py-24 max-w-5xl">
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">User Dashboard</h1>
+            <p className="text-muted-foreground mt-1">Welcome back, manage your pickup requests.</p>
+          </div>
+          <Button variant="outline" onClick={handleLogout}><LogOut className="h-4 w-4 mr-2" /> Logout</Button>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+          <div className="bg-card p-6 rounded-xl border shadow-sm">
+            <h3 className="text-sm font-medium text-muted-foreground">Total Requests</h3>
+            <p className="text-3xl font-bold mt-2">{total}</p>
+          </div>
+          <div className="bg-blue-50/50 dark:bg-blue-900/20 p-6 rounded-xl border border-blue-100 dark:border-blue-800 shadow-sm">
+            <h3 className="text-sm font-medium text-blue-600 dark:text-blue-400">Pending</h3>
+            <p className="text-3xl font-bold mt-2 text-blue-700 dark:text-blue-300">{pending}</p>
+          </div>
+          <div className="bg-yellow-50/50 dark:bg-yellow-900/20 p-6 rounded-xl border border-yellow-100 dark:border-yellow-800 shadow-sm">
+            <h3 className="text-sm font-medium text-yellow-600 dark:text-yellow-400">In Progress</h3>
+            <p className="text-3xl font-bold mt-2 text-yellow-700 dark:text-yellow-300">{accepted}</p>
+          </div>
+          <div className="bg-green-50/50 dark:bg-green-900/20 p-6 rounded-xl border border-green-100 dark:border-green-800 shadow-sm">
+            <h3 className="text-sm font-medium text-green-600 dark:text-green-400">Completed</h3>
+            <p className="text-3xl font-bold mt-2 text-green-700 dark:text-green-300">{completed}</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2">
+            <h2 className="text-xl font-bold mb-4">Request History</h2>
+            {requests.length === 0 ? (
+              <div className="text-center py-12 border rounded-xl bg-card/50 text-muted-foreground">
+                No requests found. Create one to get started!
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {requests.map((r) => (
+                  <div key={r.id} className="bg-card border rounded-xl p-5 flex flex-col sm:flex-row gap-4 shadow-sm items-start">
+                    {r.photo && (
+                      <img src={r.photo} alt="Waste" className="w-full sm:w-32 h-32 object-cover rounded-lg shrink-0" />
+                    )}
+                    <div className="flex-1 space-y-2 w-full">
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <p className="font-semibold text-lg">{r.address}</p>
+                          <p className="text-sm text-muted-foreground">{new Date(r.submittedAt).toLocaleDateString()}</p>
+                        </div>
+                        <span className={`px-2.5 py-1 text-xs rounded-full font-medium whitespace-nowrap ${
+                          r.status === 'Completed' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' :
+                          r.status === 'Pending' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' :
+                          'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
+                        }`}>
+                          {r.status}
+                        </span>
+                      </div>
+                      <p className="text-sm"><span className="font-medium">Preferred Time:</span> {new Date(r.time).toLocaleString()}</p>
+                      {r.notes && <p className="text-sm text-muted-foreground"><span className="font-medium text-foreground">Notes:</span> {r.notes}</p>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div>
+            <div className="bg-card border rounded-xl p-6 shadow-sm sticky top-24">
+              <h2 className="text-xl font-bold mb-4 flex items-center"><Plus className="h-5 w-5 mr-2" /> New Request</h2>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="address">Full Address</Label>
+                  <Input id="address" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="123 Temple Road, City" required />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="time">Preferred Pickup Time</Label>
+                  <Input id="time" type="datetime-local" value={time} onChange={(e) => setTime(e.target.value)} required />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="notes">Additional Notes</Label>
+                  <Input id="notes" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Quantity of waste, special instructions..." />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="photo">Upload Image</Label>
+                  <Input id="photo" type="file" accept="image/*" onChange={handleImageChange} className="cursor-pointer" />
+                </div>
+                <Button type="submit" className="w-full">Submit Request</Button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export default Index;

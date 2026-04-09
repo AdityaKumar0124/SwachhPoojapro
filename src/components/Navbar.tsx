@@ -1,34 +1,64 @@
-import { useState } from "react";
-import { Menu, X, Leaf } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Menu, X, Leaf, UserCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Link, useLocation } from "react-router-dom";
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
+  const location = useLocation();
+  const [isLogged, setIsLogged] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const checkAuth = () => {
+      const mockStr = localStorage.getItem("mock_login");
+      if (mockStr) {
+        setIsLogged(true);
+        if (JSON.parse(mockStr).role === "Admin") setIsAdmin(true);
+      }
+    };
+    checkAuth();
+  }, [location.pathname]);
+
   const links = [
-    { label: "Home", href: "#home" },
-    { label: "How It Works", href: "#how-it-works" },
-    { label: "About", href: "#about" },
-    { label: "Benefits", href: "#benefits" },
-    { label: "Contact", href: "#contact" },
+    { label: "Home", href: "/" },
+    { label: "About Us", href: "/about" },
+    { label: "Activity", href: "/activity" },
+    { label: "Support NGO", href: "/support" },
+    { label: "Contact", href: "/contact" },
   ];
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-card/90 backdrop-blur-md border-b">
-      <div className="container flex items-center justify-between h-16">
-        <a href="#home" className="flex items-center gap-2 font-bold text-lg text-primary">
+      <div className="container mx-auto px-4 flex items-center justify-between h-16 max-w-6xl">
+        <Link to="/" className="flex items-center gap-2 font-bold text-lg text-primary">
           <Leaf className="h-6 w-6" /> SwachhPooja
-        </a>
+        </Link>
 
         {/* Desktop */}
         <div className="hidden md:flex items-center gap-6">
           {links.map((l) => (
-            <a key={l.href} href={l.href} className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+            <Link key={l.href} to={l.href} className={`text-sm font-medium transition-colors hover:text-primary ${location.pathname === l.href ? "text-primary" : "text-muted-foreground"}`}>
               {l.label}
-            </a>
+            </Link>
           ))}
-          <Button asChild size="sm">
-            <a href="#request">Request Pickup</a>
-          </Button>
+          
+          {isLogged ? (
+            <Button asChild size="sm" variant="outline">
+              <Link to={isAdmin ? "/admin" : "/dashboard"} className="flex items-center gap-2">
+                <UserCircle className="h-4 w-4" /> Dashboard
+              </Link>
+            </Button>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Button asChild size="sm" variant="ghost">
+                <Link to="/login">Login</Link>
+              </Button>
+              <Button asChild size="sm">
+                <Link to="/signup">Join Us</Link>
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* Mobile toggle */}
@@ -39,16 +69,30 @@ const Navbar = () => {
 
       {/* Mobile menu */}
       {open && (
-        <div className="md:hidden bg-card border-b pb-4">
-          <div className="container flex flex-col gap-3">
+        <div className="md:hidden bg-card border-b pb-4 shadow-lg absolute w-full">
+          <div className="container mx-auto px-4 flex flex-col gap-3 pt-2">
             {links.map((l) => (
-              <a key={l.href} href={l.href} onClick={() => setOpen(false)} className="text-sm font-medium text-muted-foreground hover:text-primary py-1">
+              <Link key={l.href} to={l.href} onClick={() => setOpen(false)} className={`text-sm font-medium py-2 border-b border-border/50 ${location.pathname === l.href ? "text-primary" : "text-muted-foreground"}`}>
                 {l.label}
-              </a>
+              </Link>
             ))}
-            <Button asChild size="sm" className="w-fit" onClick={() => setOpen(false)}>
-              <a href="#request">Request Pickup</a>
-            </Button>
+            
+            <div className="pt-2 flex flex-col gap-2">
+              {isLogged ? (
+                <Button asChild size="sm" className="w-full justify-start" onClick={() => setOpen(false)}>
+                  <Link to={isAdmin ? "/admin" : "/dashboard"}><UserCircle className="mr-2 h-4 w-4" /> Dashboard</Link>
+                </Button>
+              ) : (
+                <>
+                  <Button asChild size="sm" variant="outline" className="w-full justify-start" onClick={() => setOpen(false)}>
+                    <Link to="/login">Login</Link>
+                  </Button>
+                  <Button asChild size="sm" className="w-full justify-start" onClick={() => setOpen(false)}>
+                    <Link to="/signup">Join Us</Link>
+                  </Button>
+                </>
+              )}
+            </div>
           </div>
         </div>
       )}
